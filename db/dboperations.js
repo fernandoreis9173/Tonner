@@ -1,5 +1,6 @@
 var config = require('./dbconfig');
 const sql = require('mssql');
+const { server } = require('./dbconfig');
 
 //LISTA TODOS OS REGISTRO DA TABELA
 async function gettonners() {
@@ -31,13 +32,18 @@ async function gettonner(tonnerId) {
 async function addTonner(adicionatonner) {
     try {
         console.log(adicionatonner);
-        const { id, serial,fabricante,modelo,local, quantidade } = adicionatonner
+        const {fabricante,modelo,local, quantidade } = adicionatonner
         let pool = await sql.connect(config);
         let product = await pool.request()
-            .query(`insert into tonner (serial, fabricante, modelo, local, quantidade)
-             values ('${serial}', '${fabricante}', '${modelo}', '${local}', '${quantidade}')`)
+        .query(`EXECUTE DBO.PROC_ATUALIZA_TONNER 
+        @fabricante= '${fabricante}',
+        @modelo= '${modelo}',
+        @local= '${local}',
+        @quantidade= ${quantidade}
+    
+    `)
         // .query("UPDATE tonner SET serial = @input_parameter where id = @input_parameter");
-        return product.recordsets;
+        return product;
     }
     catch (error) {
         console.log(error);
@@ -62,16 +68,18 @@ async function deleteTonner(deletetonner) {
 async function alterTonner(alteratonner) {
     try {
         console.log(alteratonner);
-        const { id, serial,fabricante,modelo,local,quantidade,dt_atualizacao } = alteratonner
+        const { id,fabricante,modelo,local,quantidade } = alteratonner
         let pool = await sql.connect(config);
         let product = await pool.request()
-            .query(`UPDATE tonner SET serial = '${serial}' 
-            , fabricante = '${fabricante}'
-            , modelo = '${modelo}'
-            , local = '${local}'
-            , quantidade = '${quantidade}'
-            , dt_atualizacao = '${dt_atualizacao}' where id =${id}`)
-        return product.recordsets;
+            .query(`EXECUTE DBO.PROC_ATUALIZA_TONNER 
+                @ID = ${id},
+                @fabricante= '${fabricante}',
+                @modelo= '${modelo}',
+                @local= '${local}',
+                @quantidade= ${quantidade}
+            
+            `)
+        return product;
     }
     catch (error) {
         console.log(error);
